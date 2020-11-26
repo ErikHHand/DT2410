@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def room_to_source_coordinates(a, x1, x2, y1, y2):
     xcoord = 0
@@ -21,6 +22,26 @@ def room_to_source_coordinates(a, x1, x2, y1, y2):
         ycoord = ycoord + a[1] * (y1 + y2) * 2
 
     return [xcoord, ycoord]
+
+def distance_and_angle(source_xcoord, source_ycoord, res_xcoord, res_ycoord):
+    dx = source_xcoord - res_xcoord
+    dy = source_ycoord - res_ycoord
+
+    if dx >= 0 and dy >= 0:
+        angle = math.atan(dx / dy)
+
+    if dx >= 0 and dy < 0:
+        angle = 90 - math.atan(dy / dx)
+
+    if dx < 0 and dy < 0:
+        angle = 180 + math.atan(dx / dy)
+
+    if dx < 0 and dy >= 0:
+        angle = 270 - math.atan(dy / dx)
+    
+    distance = math.sqrt(dx ** 2 + dy ** 2)
+
+    return [distance, angle]
 
 room_width = 7
 room_length = 5
