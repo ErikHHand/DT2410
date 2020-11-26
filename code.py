@@ -43,11 +43,13 @@ def distance_and_angle(source_xcoord, source_ycoord, res_xcoord, res_ycoord):
 
     return [distance, angle]
 
+# Define rooms parameters and number of reflections
 room_width = 7
 room_length = 5
 
-reflection_max = 5
+reflection_max = 5 #Maximala antalet reflektioner vi utvärderar för
 
+# Define source, reciever and distances between them
 source = [2, 1]
 reveiver = [5, 3]
 
@@ -57,29 +59,36 @@ x2 = room_width - source[0]
 y1 = source[1]
 y2 = room_length - source[1]
 
-n = reflection_max
-m = ((2 * n + 1) ** 2)
+# generate "room-coordinates"
+n = reflection_max  # Rumkoordinater från (-n,-n) till (n,n)
+m = ((2 * n + 1) ** 2)  # Antal rum som genereras. 20% sorteras bort
+spegelrum = np.zeros((m, 2))  # Tom lista över rumskoordinater
 
-spegelrum = np.zeros((m, 2))
-
+# Fyll listan med "rumskoordinater"
 col = 0
 for i in range(2 * n + 1):
     for j in range(2 * n + 1):
         spegelrum[col] = [i - n, j - n]
         col = col + 1
 
-#print(spegelrum)
+# för n = 1 (transponerat):
+# -1    -1    -1     0     0     0     1     1     1
+# -1     0     1    -1     0     1    -1     0     1
 
+# Klassificerar vaje koordinatpar till ett visst antal reflektioner 
 orderlist = abs(spegelrum[:, 0]) + abs(spegelrum[:, 1])
 
-print(orderlist)
+# för n = 1 (transponerat):
+# 2     1     2     1     0     1     2     1     2
+
+# Generate source coordinates
 
 no_of_rays = 2 * (reflection_max ** 2 + reflection_max) + 1
 no_of_reflections = np.zeros((no_of_rays, 1))
 
-mirror_source_coordinates = np.zeros((no_of_rays, 2))
+mirror_source_coordinates = np.zeros((no_of_rays, 2)) # Definierar vektor för alla kordinater
 mirror_source_coordinates[0,:] = source
-no_of_reflections[0] = 0 #???
+no_of_reflections[0] = 0 
 
 ray_number = 1
 
