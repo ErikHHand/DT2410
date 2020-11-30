@@ -90,9 +90,9 @@ mirror_source_coordinates = np.zeros((no_of_rays, 2)) # Definierar vektor för a
 mirror_source_coordinates[0,:] = source
 no_of_reflections[0] = 0 
 
-ray_number = 1
+ray_number = 0
 
-for reflection in range(reflection_max):
+for reflection in range(reflection_max + 1):
     ind_with_n_number_of_reflections = [i for i, x in enumerate(orderlist) if x == reflection]
     rooms_with_n_number_of_reflections = np.zeros((len(ind_with_n_number_of_reflections) ,2))
     for i in range(len(ind_with_n_number_of_reflections)):
