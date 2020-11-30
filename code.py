@@ -43,6 +43,15 @@ def distance_and_angle(source_xcoord, source_ycoord, res_xcoord, res_ycoord):
 
     return [distance, angle]
 
+def delay_and_attenuation(number_of_reflections,distance_traveled,loss_factor):
+    attenuation_distance = distance_traveled**(-2);
+    attenuation_reflections = number_of_reflections*loss_factor;
+    attenuation = attenuation_reflections*attenuation_distance
+    
+    delay = distance_traveled/343; #time delay in seconds!
+ 
+    return attenuation, delay
+
 # Define rooms parameters and number of reflections
 room_width = 7
 room_length = 5
@@ -58,6 +67,9 @@ x2 = room_width - source[0]
 
 y1 = source[1]
 y2 = room_length - source[1]
+
+# define wall absorbtion as a loss factor
+wall_loss_factor = 0.6 # 60 % of the sound is absorbed for each reflection, regardless of frequecy
 
 # generate "room-coordinates"
 n = reflection_max  # Rumkoordinater från (-n,-n) till (n,n)
