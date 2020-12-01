@@ -1,5 +1,17 @@
 import numpy as np
 import math
+import glob
+from scipy.io import wavfile
+
+def read_in_HRTFs_to_array(dir):
+    filenames = glob.glob(dir + '/*.wav')
+    
+    Fs, temp = wavfile.read(filenames[1])
+    a = np.zeros(shape=(len(temp),len(filenames)))
+    for x in range(len(filenames)):
+        Fs, a[:,1] = wavfile.read(filenames[x])
+    
+    return a
 
 def room_to_source_coordinates(a, x1, x2, y1, y2):
     xcoord = 0
@@ -70,6 +82,10 @@ y2 = room_length - source[1]
 
 # define wall absorbtion as a loss factor
 wall_loss_factor = 0.6 # 60 % of the sound is absorbed for each reflection, regardless of frequecy
+
+# import HRTFs
+HRTFsleft = read_in_HRTFs_to_array('HRTF L')
+HRTFsright = read_in_HRTFs_to_array('HRTF R')
 
 # generate "room-coordinates"
 n = reflection_max  # Rumkoordinater från (-n,-n) till (n,n)
