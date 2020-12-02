@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import glob
+import sys
 from scipy.io import wavfile
 
 def read_in_HRTFs_to_array(dir):
@@ -56,8 +57,8 @@ def distance_and_angle(source_xcoord, source_ycoord, rec_xcoord, rec_ycoord):
     return distance, angle
 
 def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor):
-    attenuation_distance = distance_traveled ** (-2)
-    attenuation_reflections = number_of_reflections * loss_factor
+    attenuation_distance = distance_traveled ** (-0.8)
+    attenuation_reflections = number_of_reflections ** loss_factor
     attenuation = attenuation_reflections * attenuation_distance
     
     delay = distance_traveled / 343; #time delay in seconds!
@@ -68,7 +69,7 @@ def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor)
 room_width = 7
 room_length = 5
 
-reflection_max = 4 #Maximala antalet reflektioner vi utvärderar för
+reflection_max = 5 #Maximala antalet reflektioner vi utvärderar för
 
 # Define source, reciever and distances between them
 source = [2, 1]
@@ -132,7 +133,10 @@ for reflection in range(reflection_max + 1):
         mirror_source_coordinates[ray_number,:] = room_to_source_coordinates(room,x1,x2,y1,y2)
         no_of_reflections[ray_number] = reflection
 
-angles_ref = np.zeros(no_of_rays)
+
+## Calculate delay, attenuation and angle befoer mixing sounds
+
+angles_ref = [] # Stores reference to sound file, NOT the actual angle
 distances = np.zeros(no_of_rays)
 attenuations = np.zeros(no_of_rays)
 delays = np.zeros(no_of_rays)
@@ -141,7 +145,7 @@ ray_number = 0
 
 for mirrored_coordinates in mirror_source_coordinates:
     distance, angle = distance_and_angle(mirrored_coordinates[0], mirrored_coordinates[1], receiver[0], receiver[1])
-    angles_ref[ray_number] = int(angle / 5 + 1)
+    angles_ref.append(int(angle / 5 + 1))
     distances[ray_number] = distance
 
     delay, attenuation = delay_and_attenuation(no_of_reflections[ray_number], distance, wall_loss_factor)
@@ -150,4 +154,20 @@ for mirrored_coordinates in mirror_source_coordinates:
 
     ray_number = ray_number + 1
 
-print(delays)
+
+## Mix sounds
+
+original_sound_length = len(HRTFsleft[0])
+new_sound_length = int(44100 * delays[np.argmax(delays)]) + 1 + original_sound_length # TODO: Don't hard code sample rate
+
+new_sound_L = np.zeros(new_sound_length, dtype=int)
+
+for ray in range(no_of_rays):
+    start_index = int(44100 * delays[ray])
+    for sample in range(original_sound_length):
+        new_sound_L[start_index + sample] = new_sound_L[start_index + sample] + HRTFsleft[angles_ref[ray], sample] * attenuations[ray]
+    #print(ray)
+
+np.set_printoptions(threshold=sys.maxsize)
+#print(new_sound_L)
+print(new_sound_L[np.argmax(new_sound_L)])
