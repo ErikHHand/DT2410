@@ -7,9 +7,9 @@ def read_in_HRTFs_to_array(dir):
     filenames = glob.glob(dir + '/*.wav')
     
     Fs, temp = wavfile.read(filenames[1])
-    a = np.zeros(shape=(len(temp),len(filenames)))
+    a = np.zeros(shape=(len(filenames), len(temp)), dtype=int)
     for x in range(len(filenames)):
-        Fs, a[:,1] = wavfile.read(filenames[x])
+        Fs, a[x, :] = wavfile.read(filenames[x])
     
     return a
 
@@ -35,44 +35,44 @@ def room_to_source_coordinates(a, x1, x2, y1, y2):
 
     return [xcoord, ycoord]
 
-def distance_and_angle(source_xcoord, source_ycoord, res_xcoord, res_ycoord):
-    dx = source_xcoord - res_xcoord
-    dy = source_ycoord - res_ycoord
+def distance_and_angle(source_xcoord, source_ycoord, rec_xcoord, rec_ycoord):
+    dx = source_xcoord - rec_xcoord
+    dy = source_ycoord - rec_ycoord
 
-    if dx >= 0 and dy >= 0:
-        angle = math.atan(dx / dy)
+    if dx >= 0 and dy > 0:
+        angle = math.degrees(math.atan(dx / dy))
 
-    if dx >= 0 and dy < 0:
-        angle = 90 - math.atan(dy / dx)
+    if dx > 0 and dy <= 0:
+        angle = 90 - math.degrees(math.atan(dy / dx))
 
-    if dx < 0 and dy < 0:
-        angle = 180 + math.atan(dx / dy)
+    if dx <= 0 and dy < 0:
+        angle = 180 + math.degrees(math.atan(dx / dy))
 
     if dx < 0 and dy >= 0:
-        angle = 270 - math.atan(dy / dx)
+        angle = 270 - math.degrees(math.atan(dy / dx))
     
     distance = math.sqrt(dx ** 2 + dy ** 2)
 
-    return [distance, angle]
+    return distance, angle
 
-def delay_and_attenuation(number_of_reflections,distance_traveled,loss_factor):
-    attenuation_distance = distance_traveled**(-2);
-    attenuation_reflections = number_of_reflections*loss_factor;
-    attenuation = attenuation_reflections*attenuation_distance
+def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor):
+    attenuation_distance = distance_traveled ** (-2)
+    attenuation_reflections = number_of_reflections * loss_factor
+    attenuation = attenuation_reflections * attenuation_distance
     
-    delay = distance_traveled/343; #time delay in seconds!
+    delay = distance_traveled / 343; #time delay in seconds!
  
-    return attenuation, delay
+    return delay, attenuation
 
 # Define rooms parameters and number of reflections
 room_width = 7
 room_length = 5
 
-reflection_max = 5 #Maximala antalet reflektioner vi utvärderar för
+reflection_max = 4 #Maximala antalet reflektioner vi utvärderar för
 
 # Define source, reciever and distances between them
 source = [2, 1]
-reveiver = [5, 3]
+receiver = [5, 4]
 
 x1 = source[0]
 x2 = room_width - source[0]
@@ -131,3 +131,23 @@ for reflection in range(reflection_max + 1):
         room = rooms_with_n_number_of_reflections[sourceN,:]
         mirror_source_coordinates[ray_number,:] = room_to_source_coordinates(room,x1,x2,y1,y2)
         no_of_reflections[ray_number] = reflection
+
+angles_ref = np.zeros(no_of_rays)
+distances = np.zeros(no_of_rays)
+attenuations = np.zeros(no_of_rays)
+delays = np.zeros(no_of_rays)
+
+ray_number = 0
+
+for mirrored_coordinates in mirror_source_coordinates:
+    distance, angle = distance_and_angle(mirrored_coordinates[0], mirrored_coordinates[1], receiver[0], receiver[1])
+    angles_ref[ray_number] = int(angle / 5 + 1)
+    distances[ray_number] = distance
+
+    delay, attenuation = delay_and_attenuation(no_of_reflections[ray_number], distance, wall_loss_factor)
+    delays[ray_number] = delay
+    attenuations[ray_number] = attenuation
+
+    ray_number = ray_number + 1
+
+print(delays)
