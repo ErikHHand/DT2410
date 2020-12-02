@@ -69,7 +69,7 @@ def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor)
 room_width = 7
 room_length = 5
 
-reflection_max = 5 #Maximala antalet reflektioner vi utvärderar för
+reflection_max = 4 #Maximala antalet reflektioner vi utvärderar för
 
 # Define source, reciever and distances between them
 source = [2, 1]
@@ -169,5 +169,5 @@ for ray in range(no_of_rays):
     #print(ray)
 
 np.set_printoptions(threshold=sys.maxsize)
-#print(new_sound_L)
+print(new_sound_L)
 print(new_sound_L[np.argmax(new_sound_L)])
