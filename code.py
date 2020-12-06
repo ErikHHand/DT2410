@@ -3,6 +3,7 @@ import math
 import glob
 import sys
 from scipy.io import wavfile
+import scipy.signal as signal
 
 def read_in_HRTFs_to_array(dir):
     filenames = glob.glob(dir + '/*.wav')
@@ -57,7 +58,7 @@ def distance_and_angle(source_xcoord, source_ycoord, rec_xcoord, rec_ycoord):
     return distance, angle
 
 def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor):
-    attenuation_distance = distance_traveled ** (-1)
+    attenuation_distance = distance_traveled ** (-1.7)
     attenuation_reflections = number_of_reflections ** loss_factor
     attenuation = attenuation_reflections * attenuation_distance
     
@@ -66,14 +67,14 @@ def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor)
     return delay, attenuation
 
 # Define rooms parameters and number of reflections
-room_width = 7
-room_length = 5
+room_width = 30
+room_length = 25
 
-reflection_max = 10 #Maximala antalet reflektioner vi utvärderar för
+reflection_max = 50 #Maximala antalet reflektioner vi utvärderar för
 
 # Define source, reciever and distances between them
 source = [2, 1]
-receiver = [5, 4]
+receiver = [29, 15]
 
 x1 = source[0]
 x2 = room_width - source[0]
@@ -112,6 +113,8 @@ orderlist = abs(spegelrum[:, 0]) + abs(spegelrum[:, 1])
 
 # Generate source coordinates
 
+print("Generate mirrored coordinates.... ", end="")
+
 no_of_rays = 2 * (reflection_max ** 2 + reflection_max) + 1
 no_of_reflections = np.zeros((no_of_rays, 1))
 
@@ -132,10 +135,11 @@ for reflection in range(reflection_max + 1):
         room = rooms_with_n_number_of_reflections[sourceN,:]
         mirror_source_coordinates[ray_number,:] = room_to_source_coordinates(room,x1,x2,y1,y2)
         no_of_reflections[ray_number] = reflection
+print("Done")
 
 
-## Calculate delay, attenuation and angle befoer mixing sounds
-
+## Calculate delay, attenuation and angle before mixing sounds
+print("Calculate delay, attenuation and angles.... ", end="")
 angles_ref = [] # Stores reference to sound file, NOT the actual angle
 distances = np.zeros(no_of_rays)
 attenuations = np.zeros(no_of_rays)
@@ -153,21 +157,61 @@ for mirrored_coordinates in mirror_source_coordinates:
     attenuations[ray_number] = attenuation
 
     ray_number = ray_number + 1
+print("Done")
 
 
-## Mix sounds
+## Create new impulses based on rays
 
-original_sound_length = len(HRTFsleft[0])
-new_sound_length = int(44100 * delays[np.argmax(delays)]) + 1 + original_sound_length # TODO: Don't hard code sample rate
+original_impulse_length = len(HRTFsleft[0])
+new_impulse_length = int(44100 * delays[np.argmax(delays)]) + 1 + original_impulse_length # TODO: Don't hard code sample rate
 
-new_sound_L = np.zeros(new_sound_length, dtype=int)
+## Left
+new_impulse_L = np.zeros(new_impulse_length, dtype=int)
 
 for ray in range(no_of_rays):
     start_index = int(44100 * delays[ray])
-    for sample in range(original_sound_length):
-        new_sound_L[start_index + sample] = new_sound_L[start_index + sample] + HRTFsleft[angles_ref[ray], sample] * attenuations[ray]
-    #print(ray)
+    for sample in range(original_impulse_length):
+        new_impulse_L[start_index + sample] = new_impulse_L[start_index + sample] + HRTFsleft[angles_ref[ray], sample] * attenuations[ray]
+    if ray % 100 == 0:
+        print("Creating Left impulse, ray %d/"%ray + str(no_of_rays) + "\r", end="")
 
-np.set_printoptions(threshold=sys.maxsize)
-print(new_sound_L)
-print(new_sound_L[np.argmax(new_sound_L)])
+print("Creating Left impulse, ray " + str(no_of_rays) + "/" + str(no_of_rays))
+
+## Right
+new_impulse_R = np.zeros(new_impulse_length, dtype=int)
+
+for ray in range(no_of_rays):
+    start_index = int(44100 * delays[ray])
+    for sample in range(original_impulse_length):
+        new_impulse_R[start_index + sample] = new_impulse_R[start_index + sample] + HRTFsright[angles_ref[ray], sample] * attenuations[ray]
+    if ray % 100 == 0:
+        print("Creating Right impulse, ray %d/"%ray + str(no_of_rays) + "\r", end="")
+print("Creating Right impulse, ray " + str(no_of_rays) + "/" + str(no_of_rays))
+
+# Import and split audio file into left and right
+sample_rate, test_audio = wavfile.read("piano.wav")
+length = test_audio.shape[0]
+
+left = np.zeros(length)
+right = np.zeros(length)
+
+for i in range(length):
+    left[i] = test_audio[i, 0]
+    right[i] = test_audio[i, 1]
+
+print("Do convolution")
+# Do convolution
+left_convolve = signal.convolve(left, new_impulse_L, mode="full")
+right_convolve = signal.convolve(right, new_impulse_L, mode="full")
+
+left_convolve = left_convolve / left_convolve[np.argmax(left_convolve)]
+right_convolve = right_convolve / right_convolve[np.argmax(right_convolve)]
+
+# Write new aufio file
+new_audio = np.zeros((left_convolve.shape[0], 2))
+
+new_audio[:, 0] = left_convolve
+new_audio[:, 1] = right_convolve
+
+wavfile.write("newAudio.wav", sample_rate, new_audio)
+print("New audiofile created!")
