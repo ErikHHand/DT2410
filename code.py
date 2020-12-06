@@ -67,14 +67,14 @@ def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor)
     return delay, attenuation
 
 # Define rooms parameters and number of reflections
-room_width = 8
-room_length = 6
+room_width = 30
+room_length = 25
 
 reflection_max = 80 #Maximala antalet reflektioner vi utvärderar för
 
 # Define source, reciever and distances between them
 source = [3, 3]
-receiver = [5, 5]
+receiver = [20, 20]
 
 x1 = source[0]
 x2 = room_width - source[0]
@@ -177,6 +177,7 @@ for ray in range(no_of_rays):
 
 print("Creating Left impulse, ray " + str(no_of_rays) + "/" + str(no_of_rays))
 
+
 ## Right
 new_impulse_R = np.zeros(new_impulse_length, dtype=int)
 
@@ -187,6 +188,7 @@ for ray in range(no_of_rays):
     if ray % 100 == 0:
         print("Creating Right impulse, ray %d/"%ray + str(no_of_rays) + "\r", end="")
 print("Creating Right impulse, ray " + str(no_of_rays) + "/" + str(no_of_rays))
+
 
 # Import and split audio file into left and right
 sample_rate, test_audio = wavfile.read("piano.wav")

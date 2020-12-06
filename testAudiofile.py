@@ -10,12 +10,13 @@ Fs, temp = wavfile.read("piano.wav")
 #temp = temp / temp[np.argmax(temp)]
 
 length = temp.shape[0]
-print(length)
+print(np.argmax(temp))
+print(temp[np.argmax(temp), 0])
+print(temp[np.argmax(temp), 1])
 
 L = np.zeros(length)
+R = np.zeros(length)
 
-#for i in range(length):
-    #L[i] = temp[i]
-print(temp / temp[np.argmax(temp)])
 
-wavfile.write("anotherTest.wav", Fs, temp)
+
+#wavfile.write("anotherTest.wav", Fs, temp)
