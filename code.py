@@ -57,7 +57,7 @@ def distance_and_angle(source_xcoord, source_ycoord, rec_xcoord, rec_ycoord):
     return distance, angle
 
 def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor):
-    attenuation_distance = distance_traveled ** (-0.8)
+    attenuation_distance = distance_traveled ** (-1)
     attenuation_reflections = number_of_reflections ** loss_factor
     attenuation = attenuation_reflections * attenuation_distance
     
@@ -69,7 +69,7 @@ def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor)
 room_width = 7
 room_length = 5
 
-reflection_max = 4 #Maximala antalet reflektioner vi utvärderar för
+reflection_max = 10 #Maximala antalet reflektioner vi utvärderar för
 
 # Define source, reciever and distances between them
 source = [2, 1]
