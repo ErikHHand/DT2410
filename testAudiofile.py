@@ -14,9 +14,20 @@ print(np.argmax(temp))
 print(temp[np.argmax(temp), 0])
 print(temp[np.argmax(temp), 1])
 
-L = np.zeros(length)
-R = np.zeros(length)
+left = np.zeros(length)
+right = np.zeros(length)
 
+for i in range(length):
+    left[i] = temp[i, 0]
+    right[i] = temp[i, 1]
 
+left = left / abs(max(left.min(), left.max(), key=abs))
+right = right / abs(max(right.min(), right.max(), key=abs))
 
-#wavfile.write("anotherTest.wav", Fs, temp)
+# Write new aufio file
+new_audio = np.zeros((left.shape[0], 2))
+
+new_audio[:, 0] = left
+new_audio[:, 1] = right
+
+wavfile.write("anotherTest.wav", Fs, new_audio)
