@@ -67,14 +67,14 @@ def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor)
     return delay, attenuation
 
 # Define rooms parameters and number of reflections
-room_width = 30
-room_length = 20
+room_width = 10
+room_length = 9
 
 reflection_max = 80 #Maximala antalet reflektioner vi utvärderar för
 
 # Define source, reciever and distances between them
 source = [1, 1]
-receiver = [4, 3]
+receiver = [10, 8]
 
 x1 = source[0]
 x2 = room_width - source[0]
@@ -83,7 +83,7 @@ y1 = source[1]
 y2 = room_length - source[1]
 
 # define wall absorbtion as a loss factor
-wall_loss_factor = 0.8 # 60 % of the sound is absorbed for each reflection, regardless of frequecy
+wall_loss_factor = 0.6 # 60 % of the sound is absorbed for each reflection, regardless of frequecy
 
 # import HRTFs
 HRTFsleft = read_in_HRTFs_to_array('HRTF L')
