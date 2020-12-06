@@ -58,7 +58,7 @@ def distance_and_angle(source_xcoord, source_ycoord, rec_xcoord, rec_ycoord):
     return distance, angle
 
 def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor):
-    attenuation_distance = distance_traveled ** (-1.7)
+    attenuation_distance = distance_traveled ** (-1.8)
     attenuation_reflections = number_of_reflections ** loss_factor
     attenuation = attenuation_reflections * attenuation_distance
     
@@ -67,14 +67,14 @@ def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor)
     return delay, attenuation
 
 # Define rooms parameters and number of reflections
-room_width = 30
-room_length = 25
+room_width = 8
+room_length = 6
 
-reflection_max = 50 #Maximala antalet reflektioner vi utvärderar för
+reflection_max = 80 #Maximala antalet reflektioner vi utvärderar för
 
 # Define source, reciever and distances between them
-source = [2, 1]
-receiver = [29, 15]
+source = [3, 3]
+receiver = [5, 5]
 
 x1 = source[0]
 x2 = room_width - source[0]
@@ -213,5 +213,7 @@ new_audio = np.zeros((left_convolve.shape[0], 2))
 new_audio[:, 0] = left_convolve
 new_audio[:, 1] = right_convolve
 
-wavfile.write("newAudio.wav", sample_rate, new_audio)
+filename = "room " + str(room_width) + "x" + str(room_length) + " | source " + str(source) + " | receiver " + str(receiver) + " | max reflections " + str(reflection_max) + ".wav"
+
+wavfile.write(filename, sample_rate, new_audio)
 print("New audiofile created!")
