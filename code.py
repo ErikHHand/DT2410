@@ -67,14 +67,14 @@ def delay_and_attenuation(number_of_reflections, distance_traveled, loss_factor)
     return delay, attenuation
 
 # Define rooms parameters and number of reflections
-room_width = 10
-room_length = 8
+room_width = 30
+room_length = 20
 
 reflection_max = 80 #Maximala antalet reflektioner vi utvärderar för
 
 # Define source, reciever and distances between them
 source = [1, 1]
-receiver = [10, 8]
+receiver = [4, 3]
 
 x1 = source[0]
 x2 = room_width - source[0]
