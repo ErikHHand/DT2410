@@ -72,18 +72,18 @@ room_length = 8
 
 reflection_max = 80 #Maximala antalet reflektioner vi utvärderar för
 
+# define wall absorbtion as a loss factor
+wall_loss_factor = 0.6 # 60 % of the sound is absorbed for each reflection, regardless of frequecy
+
 # Define source, reciever and distances between them
-source = [1, 1]
-receiver = [10, 8]
+source = [10, 1]
+receiver = [1, 1]
 
 x1 = source[0]
 x2 = room_width - source[0]
 
 y1 = source[1]
 y2 = room_length - source[1]
-
-# define wall absorbtion as a loss factor
-wall_loss_factor = 0.6 # 60 % of the sound is absorbed for each reflection, regardless of frequecy
 
 # import HRTFs
 HRTFsleft = read_in_HRTFs_to_array('HRTF L')
@@ -163,7 +163,7 @@ print("Done")
 ## Create new impulses based on rays
 
 original_impulse_length = len(HRTFsleft[0])
-new_impulse_length = int(44100 * delays[np.argmax(delays)]) + 1 + original_impulse_length # TODO: Don't hard code sample rate
+new_impulse_length = int(44100 * delays[np.argmax(delays)]) + 1 + original_impulse_length 
 
 ## Left
 new_impulse_L = np.zeros(new_impulse_length, dtype=int)
@@ -217,7 +217,7 @@ new_audio[:, 0] = left_convolve
 new_audio[:, 1] = right_convolve
 
 filename = ("room " + str(room_width) + "x" + str(room_length) + " | source " + str(source) + 
-    " | receiver " + str(receiver) + " | max reflections " + str(reflection_max) + " | wall loss factor " + str(wall_loss_factor) + " |.wav")
+    " | receiver " + str(receiver) + " | max reflections " + str(reflection_max) + " | absorption coefficient " + str(1 - wall_loss_factor) + " |.wav")
 
 wavfile.write(filename, sample_rate, new_audio)
 print("New audiofile created!")
